@@ -5,12 +5,8 @@
 - a layer to extract the data from the source files
 
 - the load processing done with the bulk load way
-
+  
 ## load_files file
-
-### contain the processing of creating 
-- the database named 'DataWarehouse'
-- the schemas ('gold' , 'silver' , 'bronze')
 - create 6 tables for the file in the source database
 
 ## bulk_load file

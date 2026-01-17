@@ -1,0 +1,98 @@
+# 📘 Data Catalog – Gold Layer Star Schema
+
+This data catalog documents the **Gold layer star schema** used for analytics and reporting.
+The schema follows a classic **Star Schema** design consisting of:
+
+* **Dimension tables**: `dim_customers`, `dim_products`
+* **Fact table**: `fact_sales`
+
+All Gold layer objects are implemented as **views** and sourced from the Silver layer.
+
+---
+
+## 🧑‍🤝‍🧑 Table: `gold.dim_customers`
+
+### 📌 Overview
+
+The `dim_customers` table stores **customer master data** enriched from multiple CRM and ERP sources.
+It provides a single, clean view of customer attributes such as name, gender, country, and marital status, and is used to analyze sales by customer demographics.
+
+### 📂 Columns
+
+| Column Name     | Data Type | Description                                                           | Example    |
+| --------------- | --------- | --------------------------------------------------------------------- | ---------- |
+| customer_key    | INT       | Surrogate key generated using `ROW_NUMBER()` for dimensional modeling | 101        |
+| customer_id     | INT       | Business identifier of the customer from CRM                          | 50023      |
+| customer_number | NVARCHAR  | Natural customer key used across source systems                       | AW00011000 |
+| first_name      | NVARCHAR  | Customer first name                                                   | Jon        |
+| last_name       | NVARCHAR  | Customer last name                                                    | Yang       |
+| country         | NVARCHAR  | Customer country derived from ERP location data                       | Egypt      |
+| marital_status  | NVARCHAR  | Customer marital status from CRM                                      | Married    |
+| gender          | NVARCHAR  | Customer gender resolved from CRM or ERP (fallback logic applied)     | Male       |
+| birthdate       | DATE      | Customer date of birth from ERP                                       | 1992-04-15 |
+| create_date     | DATE      | Customer record creation date in CRM                                  | 2021-08-10 |
+
+---
+
+## 📦 Table: `gold.dim_products`
+
+### 📌 Overview
+
+The `dim_products` table contains **product master data** combined with category and maintenance information.
+Historical product records are excluded to ensure only **active products** are available for reporting.
+
+### 📂 Columns
+
+| Column Name    | Data Type | Description                                  | Example       |
+| -------------- | --------- | -------------------------------------------- | ------------- |
+| product_key    | INT       | Surrogate key generated using `ROW_NUMBER()` | 21            |
+| product_id     | INT       | Business identifier for the product          | 210           |
+| product_number | NVARCHAR  | Natural product key from CRM                 | FR-R92B-58    |
+| category_id    | INT       | Product category identifier                  | CO_RF         |
+| category       | NVARCHAR  | High-level product category                  | Components    |
+| sub_category   | NVARCHAR  | Detailed product sub-category                | Road Frames   |
+| product_name   | NVARCHAR  | Product name                                 | HL Road Frame |
+| product_line   | NVARCHAR  | Product line or brand grouping               | Road          |
+| product_cost   | INT       | Base cost of the product                     | 850           |
+| maintenance    | NVARCHAR  | Maintenance or service requirement flag      | Yes           |
+| start_date     | DATE      | Product activation/start date                | 2023-01-01    |
+
+---
+
+## 🧾 Table: `gold.fact_sales`
+
+### 📌 Overview
+
+The `fact_sales` table stores **transaction-level sales data**.
+It links customers and products through foreign keys and captures order lifecycle dates, quantities, prices, and total sales values.
+
+### 📂 Columns
+
+| Column Name    | Data Type | Description                                          | Example    |
+| -------------- | --------- | ---------------------------------------------------- | ---------- |
+| order_number   | NVARCHAR  | Unique sales order identifier                        | SO43697    |
+| customer_key   | INT       | Foreign key referencing `dim_customers.customer_key` | 101        |
+| product_key    | INT       | Foreign key referencing `dim_products.product_key`   | 205        |
+| order_date     | DATE      | Date when the order was placed                       | 2024-03-12 |
+| ship_date      | DATE      | Date when the order was shipped                      | 2024-03-13 |
+| delivered_date | DATE      | Date when the order was delivered                    | 2024-03-15 |
+| price          | INT       | Unit price of the product at order time              | 1200       |
+| quantity       | INT       | Number of units sold                                 | 2          |
+| sales          | INT       | Total sales amount (`price × quantity`)              | 2400.00    |
+
+---
+
+## 🔗 Schema Relationships
+
+* `fact_sales.customer_key` → `dim_customers.customer_key`
+* `fact_sales.product_key` → `dim_products.product_key`
+
+This structure enables efficient slicing and aggregation of sales data by customer and product dimensions.
+
+---
+
+## ✅ Notes
+
+* All Gold layer tables are **views**, not physical tables.
+* Surrogate keys are generated in the Gold layer to support analytical modeling.
+* This catalog is designed to be **GitHub-friendly** and suitable for documentation in analytics or data engineering projects.

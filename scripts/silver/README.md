@@ -10,7 +10,8 @@
 ### check the data from the bronze layer
 - in this file we check the cleanness of the fields in the bronze entity
 - try to understand the data and the concepts behind it
-### in inserting file
+###### note : the same file in the tests repo
+### inserting file
 #### we have done data transformtion
 ##### data cleaning
 - remove duplicates
